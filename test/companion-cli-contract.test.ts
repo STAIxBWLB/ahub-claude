@@ -31,7 +31,7 @@ test("every ahub command the companion runs or types is a listed argv form", () 
   expect(listed(["--project", "<id|root>", "status", "--json"])).toBe(true);
   // the typed console command
   expect(status).toContain("ahub --project '${root.replaceAll(\"'\", \"'\\\\''\")}' console");
-  expect(listed(["--project", "<root>", "console"])).toBe(true);
+  expect(listed(["--project", "<id|root>", "console"])).toBe(true);
   // no other ahub subcommand is run or typed: the only command words in the shipped code are status and console
   const words = [...(status + controller + register + attention).matchAll(/\bahub (?!up\b|executable\b|read\b|output\b)(--project|\w+)/g)].map(m => m[1]);
   expect(new Set(words)).toEqual(new Set(["--project"]));

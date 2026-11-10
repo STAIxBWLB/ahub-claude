@@ -1,0 +1,12 @@
+{
+  "name": "ahub-claude",
+  "owner": { "name": "Young Joon Lee" },
+  "plugins": [
+    {
+      "name": "agent-hub-companion",
+      "source": "./",
+      "description": "Optional read-only agent-hub pane for Claude Code. Fixture-only: no native receipt has been run.",
+      "category": "development"
+    }
+  ]
+}

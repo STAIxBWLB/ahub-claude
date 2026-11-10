@@ -2,6 +2,10 @@
 
 C1-C3 of [#1338](https://github.com/STAIxBWLB/agent-hub/issues/1338), amended 2026-11-09. Support: **fixture_only**. All four native receipts: **NOT RUN**. Minimum supported version: **UNKNOWN**. Declared API provenance is Claude Code 2.1.319, not a supported or minimum-version promise. The separate [C0 contract](host-contract-v1.md) keeps all seven capability questions unproven or unsupported.
 
+# Repository
+
+Moved out of agent-hub by [#1387](https://github.com/STAIxBWLB/agent-hub/issues/1387); earlier history stays there. This repository reads only what [`contract/companion-cli-v1.json`](contract/companion-cli-v1.json) lists of ahub's CLI (source and version in [contract/SOURCE.md](contract/SOURCE.md)). Check it with `bun test`. `claude plugin validate .` is a static manifest and hooks check that needs no account; CI runs it with a pinned CLI, and it is not a native receipt.
+
 # What it does
 
 - `/hub` toggles a native host pane and requests a bounded read.
@@ -19,7 +23,7 @@ The displayed states distinguish running, partial, stale (over 60 seconds at ren
 
 # Manual session-only placement
 
-Distribution is **manual_session_only**. There is no companion marketplace entry or qualified persistent CLI installation. Copy the whole `integrations/claude-code` folder to a scratch location outside Claude profiles, preserving `.claude-plugin`, hooks and types. Placing that folder does not register an installed plugin. The existing agent-hub channel marketplace entry is unchanged.
+Distribution is **manual_session_only** for qualification. This repository lists the plugin in its own marketplace (`.claude-plugin/marketplace.json`), so `/plugin install agent-hub-companion --marketplace STAIxBWLB/ahub-claude` can resolve it, but that install path has **not been qualified**: no receipt covers a persistent installation, and the support matrix records `marketplaceInstallQualified: false`. The person-run procedure below stays the one qualified way to try it. Copy this repository (the whole folder, preserving `.claude-plugin`, hooks and types) to a scratch location outside Claude profiles. Placing that folder does not register an installed plugin. agent-hub's own channel plugin is separate and not part of this repository.
 
 The shipped 2.1.319 declaration kit documents `--plugin-dir <folder>` as a session-only opt-in. The following is a **person-run procedure**, not an instruction for an agent to execute. First prepare an isolated empty HOME/config, a scratch hub project and an absolute executable path; copy no credentials. From that scratch project, use an explicit noncredential environment allowlist, for example:
 

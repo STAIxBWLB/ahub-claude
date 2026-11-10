@@ -1,0 +1,50 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+env:
+  # Claude Code release whose static `plugin validate` checks this plugin. No account or login is used. Bump on purpose.
+  CLAUDE_CODE_VERSION: '2.1.322'
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - id: bun
+        run: echo "version=$(tr -d '[:space:]' < .bun-version)" >> "$GITHUB_OUTPUT"
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ steps.bun.outputs.version }}
+
+      - name: Test
+        run: bun test
+
+      - name: Install the Claude Code CLI (pinned, no login)
+        run: npm install --global --ignore-scripts=false "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}" && claude --version
+
+      - name: Plugin validate (static, no account)
+        env:
+          CLAUDE_CONFIG_DIR: ${{ runner.temp }}/claude-config
+        run: claude plugin validate .
+
+      - name: The tag matches the plugin version
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          version="$(bun -e "console.log(require('./.claude-plugin/plugin.json').version)")"
+          if [ "$GITHUB_REF_NAME" != "v$version" ]; then
+            echo "Tag $GITHUB_REF_NAME does not match .claude-plugin/plugin.json version $version." >&2
+            exit 1
+          fi

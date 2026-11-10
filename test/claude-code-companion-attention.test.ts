@@ -1,44 +1,13 @@
 import { expect, test } from "bun:test";
-import { readFileSync } from "node:fs";
-import { needs } from "../src/ui/needs.ts";
 
-/** Execute the shipped closed producer with synthetic port facts, not a daemon/account. */
-function emittedPaused(record: unknown, manual = false, state = "idle") {
-  const source = readFileSync(new URL("../src/hub/daemon.ts", import.meta.url), "utf8");
-  const begin = source.indexOf("  const pausedNote = (id: PeerId) => {");
-  const end = source.indexOf("\n  };", begin) + "\n  };".length;
-  expect(begin).toBeGreaterThan(0); expect(end).toBeGreaterThan(begin);
-  const compiled = new Bun.Transpiler({ loader: "ts" }).transformSync(source.slice(begin, end));
-  return new Function("budget", "manualPaused", "bus", `${compiled}; return pausedNote('claude');`)(
-    { record: () => record }, new Set(manual ? ["claude"] : []), { stateOf: () => state },
-  );
-}
-
-test("current pausedNote producer distinguishes budget, manual and unavailable fields", () => {
-  expect(emittedPaused({ reason: "PRIVATE_REASON", resetsAt: 10000 }).paused.startsWith("budget: ")).toBe(true);
-  expect(emittedPaused(undefined, true, "offline")).toEqual({ paused: "manual" });
-  expect(emittedPaused(undefined)).toEqual({});
-});
-
-test("current needs producer exposes one unexpired approval first, not a permission inventory", () => {
-  const value = needs({ approvals: [{ id: "perm-1", peer: "claude", expiresAt: 2000 }, { id: "perm-2", expiresAt: 3000 }], peers: { codex: { needsReview: 1 } } }, 1000);
-  expect(value.items[0]).toEqual({ kind: "approval", level: "act", peer: "claude", id: "perm-1", until: 2000 });
-  expect(needs({ approvals: [{ id: "expired", expiresAt: 999 }] }, 1000).items).toEqual([]);
-});
-
-test("offline need is broader than in_progress and cannot supply the required assigned-state proof", () => {
-  for (const state of ["proposed", "in_progress", "changes_requested"]) {
-    expect(needs({ peers: { codex: { state: "offline" } }, tasks: [{ id: 1, state, owner: "codex" }] }, 1000).items[0]?.kind).toBe("offline");
-  }
-});
-
-import { attentionLines } from "../integrations/claude-code/hooks/attention.ts";
-import { consoleCommand, projectReading, type Reading } from "../integrations/claude-code/hooks/status.ts";
+import { attentionLines } from "../hooks/attention.ts";
+import { consoleCommand, projectReading, type Reading } from "../hooks/status.ts";
 const root = "/fixture/a b'; $(touch never-run)";
 const binding = { root, projectId: "p_fixture" };
 const rawStatus = { cwd: root, projectId: binding.projectId, version: "0.35.0", peers: {}, tasks: {} };
 const positive = () => projectReading({ ...rawStatus,
-  peers: { claude: { state: "paused", queued: 0, attached: true, needsReview: 2, ...emittedPaused({ reason: "PRIVATE_REASON", resetsAt: 9999 }) } },
+  // `paused` as the contract lists it: "manual" or a string starting "budget: ". The ahub-side producer cases stay in agent-hub (test/companion-contract.test.ts), so the value is written out here.
+  peers: { claude: { state: "paused", queued: 0, attached: true, needsReview: 2, paused: "budget: PRIVATE_REASON, resets 12:00:09 AM" } },
   needs: { first: { kind: "approval", level: "act", peer: "claude", id: "PRIVATE_TICKET", until: 2000, note: "PRIVATE_NOTE" } },
 }, binding, 1000);
 

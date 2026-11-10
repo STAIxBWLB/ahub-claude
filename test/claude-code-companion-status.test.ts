@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { CompanionController, type Ports, type Response } from "../integrations/claude-code/hooks/controller.ts";
-import { CompanionError, LIMITS, aged, consoleCommand, lines, parse, bindStatus, projectReading, type Reading } from "../integrations/claude-code/hooks/status.ts";
+import { CompanionController, type Ports, type Response } from "../hooks/controller.ts";
+import { CompanionError, LIMITS, aged, consoleCommand, lines, parse, bindStatus, projectReading, type Reading } from "../hooks/status.ts";
 import { FakeClaudeCompanionCli } from "./fakes/claude-code-companion-cli.ts";
 const root = "/fixture/a b'; $(touch should-not-run)";
 const binding = { root, projectId: "p_fixture" };
@@ -145,7 +145,7 @@ describe("event and gesture boundaries", () => {
 
 test("declared registration on a fake host: pane, pass-through events, no hidden persistence or non-composer effects", async () => {
   // Computed import keeps the separate host declaration universe out of Bun's globals.
-  const moduleFile = new URL("../integrations/claude-code/hooks/register.tsx", import.meta.url).href;
+  const moduleFile = new URL("../hooks/register.tsx", import.meta.url).href;
   const { register } = await import(moduleFile);
   type Handler = (host: unknown, event: any, next: (event: any) => Promise<any>) => Promise<any>;
   const hooks = new Map<string, Handler>();
@@ -198,7 +198,7 @@ test("declared registration on a fake host: pane, pass-through events, no hidden
 });
 
 async function lifecycleHost() {
-  const moduleFile = new URL("../integrations/claude-code/hooks/register.tsx", import.meta.url).href;
+  const moduleFile = new URL("../hooks/register.tsx", import.meta.url).href;
   const { register } = await import(moduleFile);
   type Handler = (host: unknown, event: any, next: (event: any) => Promise<any>) => Promise<any>;
   const hooks = new Map<string, Handler>();

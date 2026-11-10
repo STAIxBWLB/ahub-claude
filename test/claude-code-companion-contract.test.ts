@@ -6,7 +6,7 @@ const binding = { root, projectId: "p_fixture" };
 const request = (extra: Partial<ClaudeCompanionCall> = {}): ClaudeCompanionCall => ({ executable: "ahub", argv: ["--project", root, "status", "--json"], cwd: root, ...limits, ...extra });
 const status = (extra = {}) => JSON.stringify({ cwd: root, projectId: "p_fixture", version: "0.35.0", peers: { claude: { state: "offline", queued: 2, attached: false, needsReview: 1, doing: "PRIVATE" } }, tasks: { in_review: 1 }, ...extra });
 test("C0 matrix pins seven evidence verdicts, bounds and unqualified surfaces", () => {
-  const contract = JSON.parse(readFileSync(new URL("../integrations/claude-code/host-contract-v1.json", import.meta.url), "utf8"));
+  const contract = JSON.parse(readFileSync(new URL("../host-contract-v1.json", import.meta.url), "utf8"));
   expect(contract.schema).toBe(1); expect(contract.task).toBe("C0"); expect(contract.capabilities).toHaveLength(7);
   expect(contract.fixture.bounds).toEqual(limits);
   for (const row of contract.capabilities) { expect(["proven", "unproven", "unsupported"]).toContain(row.verdict); expect(row.evidence.length).toBeGreaterThan(0); expect(row.consequence.length).toBeGreaterThan(0); }

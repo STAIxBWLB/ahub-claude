@@ -1,0 +1,6 @@
+node_modules/
+.DS_Store
+*.log
+/.agenthub/state/
+/.agenthub/*.db*
+.worktrees/

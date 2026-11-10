@@ -146,8 +146,9 @@
   "minimumVersionEvidence": null,
   "distribution": {
     "mode": "manual_session_only",
-    "marketplaceCompanionEntry": false,
+    "marketplaceCompanionEntry": true,
+    "marketplaceInstallQualified": false,
     "profileInstallationQualified": false,
-    "channelPluginEntry": "byte-identical; separate channel plugin unchanged"
+    "channelPluginEntry": "not part of this repository; agent-hub ships its own channel plugin"
   }
 }

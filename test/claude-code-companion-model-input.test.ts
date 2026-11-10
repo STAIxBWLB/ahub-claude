@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 // Keep the host-only TSX module outside the Bun project compiler's non-JSX universe.
-const compactModule = new URL("../integrations/claude-code/hooks/compact.tsx", import.meta.url).href;
+const compactModule = new URL("../hooks/compact.tsx", import.meta.url).href;
 const { compactHubToolRow, compactId, compactIds, MAX_COMPACT_IDS, toggledCompactIds } = await import(compactModule);
 
 type Node = { type: unknown; props: Record<string, any>; children: unknown[] };
@@ -30,7 +30,7 @@ async function fakeCore(enabled: boolean) {
   const hooks: Hook[] = [];
   const on = (name: string, matcher: Record<string, unknown> | Handler, handler?: Handler) => hooks.push({ name, ...(handler ? { matcher: matcher as Record<string, unknown> } : {}), handler: handler ?? matcher as Handler });
   if (enabled) {
-    const moduleFile = new URL("../integrations/claude-code/hooks/register.tsx", import.meta.url).href;
+    const moduleFile = new URL("../hooks/register.tsx", import.meta.url).href;
     const { register } = await import(moduleFile); register(on, {});
   }
   const state = new Map<string, { value: any; version: number }>(), writes: { key: string; value: unknown }[] = [];

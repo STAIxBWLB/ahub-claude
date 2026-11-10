@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 
-const folder = new URL("../integrations/claude-code/", import.meta.url);
+const folder = new URL("../", import.meta.url);
 const matrix = JSON.parse(readFileSync(new URL("support-matrix.json", folder), "utf8"));
 const names = ["terminal", "desktop", "vscode", "mobile"];
 const legs = ["pane", "attentionBand", "compactOriginal", "composerOrigin", "modelInputsOnOff", "disableRemove", "standaloneHub", "statusReadBounds"];
@@ -55,11 +55,13 @@ function completedFixture(surface: string) {
 
 test("committed manual-only matrix has four independent unqualified receipts and unknown minimum", () => {
   expect(matrixErrors(matrix, actual)).toEqual([]);
-  expect(matrix.distribution.mode).toBe("manual_session_only"); expect(matrix.distribution.marketplaceCompanionEntry).toBe(false);
+  expect(matrix.distribution.mode).toBe("manual_session_only"); expect(matrix.distribution.marketplaceCompanionEntry).toBe(true); expect(matrix.distribution.marketplaceInstallQualified).toBe(false); expect(matrix.distribution.profileInstallationQualified).toBe(false);
   expect(matrix.minimumSupportedVersion).toBeNull(); expect(matrix.nativeSupportedVersions).toEqual([]);
   for (const row of matrix.surfaces) { expect(row.verdict).not.toBe("supported"); expect(receipt(actual.get(row.receipt))?.status).toBe("NOT RUN"); }
+  // The ahub-side half (agent-hub's own marketplace lists only `agent-hub`) stays in agent-hub's test/companion-contract.test.ts. This repository's marketplace lists this one plugin and nothing else.
   const marketplace = JSON.parse(readFileSync(new URL("../.claude-plugin/marketplace.json", import.meta.url), "utf8"));
-  expect(marketplace.plugins.some((plugin: any) => plugin.name === "agent-hub-companion")).toBe(false);
+  expect(marketplace.plugins.map((plugin: any) => plugin.name)).toEqual(["agent-hub-companion"]);
+  expect(JSON.parse(readFileSync(new URL("../.claude-plugin/plugin.json", import.meta.url), "utf8")).name).toBe("agent-hub-companion");
 });
 
 test("missing, empty, NOT RUN, placeholder or another surface receipt cannot establish support", () => {
